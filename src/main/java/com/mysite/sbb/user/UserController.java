@@ -1,11 +1,21 @@
 package com.mysite.sbb.user;
 
+import java.security.Principal;
+import java.util.List;
+
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.answer.AnswerService;
+import com.mysite.sbb.question.Question;
+import com.mysite.sbb.question.QuestionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +26,11 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+    
+    private final QuestionService questionService;
+    
+    private final AnswerService answerService;
+    
 
     @GetMapping("/signup")
     public String signup(UserCreateForm userCreateForm) {
@@ -55,6 +70,19 @@ public class UserController {
     @GetMapping("/login")
     public String login() {
     	return "login_form";
+    }
+    
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/mypage")
+    public String getInfo(Model model, Principal principal) {
+    	SiteUser user = this.userService.getUser(principal.getName());
+    	List<Question> questionList = this.questionService.getQuestions(user);
+    	List<Answer> answerList = this.answerService.getListByAuthor(user);
+    	
+    	model.addAttribute("answers", answerList);
+    	model.addAttribute("questions", questionList);
+    	model.addAttribute("user", user);
+    	return "mypage";
     }
     
 }

@@ -56,10 +56,19 @@ public class QuestionService {
 		return this.questionRepository.findAll(spec, pageable);
 	}
 	
+	/*
+	 * public Question getQuestion(Integer id) { Optional<Question> question =
+	 * this.questionRepository.findById(id); if(question.isPresent()) { return
+	 * question.get(); } else { throw new
+	 * DataNotFoundException("question not found"); } }
+	 */
 	public Question getQuestion(Integer id) {
 		Optional<Question> question = this.questionRepository.findById(id);
 		if(question.isPresent()) {
-			return question.get();
+			Question question1 = question.get();
+			question1.setViewCount(question1.getViewCount() + 1);
+			this.questionRepository.save(question1);
+			return question1;
 		} else {
 			throw new DataNotFoundException("question not found");
 		}
@@ -90,6 +99,13 @@ public class QuestionService {
         this.questionRepository.save(question);
     }
 	
-	
+	public List<Question> getQuestions(SiteUser user) {
+		Optional<List<Question>> questions = this.questionRepository.findAllByAuthor(user);
+		if(questions.isPresent()) {
+			return questions.get();
+		} else {
+			throw new DataNotFoundException("question not found");
+		}
+	}
 	
 }

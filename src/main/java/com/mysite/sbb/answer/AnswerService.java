@@ -1,6 +1,7 @@
 package com.mysite.sbb.answer;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -49,6 +50,15 @@ public class AnswerService {
 	public void vote(Answer answer, SiteUser siteUser) {
 		answer.getVoter().add(siteUser);
 		this.answerRepository.save(answer);
+	}
+	
+	public List<Answer> getListByAuthor(SiteUser user) {
+		Optional<List<Answer>> answers = this.answerRepository.findAllByAuthor(user);
+		if(answers.isPresent()) {
+			return answers.get();
+		} else {
+			throw new DataNotFoundException("answer not found");
+		}
 	}
 	
 }
